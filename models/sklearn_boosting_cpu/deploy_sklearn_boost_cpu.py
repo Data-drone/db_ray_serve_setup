@@ -57,9 +57,6 @@ class BoostingModel:
       
 # COMMAND ----------
 
-# "https://e2-demo-west.cloud.databricks.com/",
-# "dapi3bd2c7a30da1b9c1bac89f81816e7787"
-        
 
 boosting_model = BoostingModel.bind("runs:/327e476d760e4723a7f0b8efeb676931/model", 
                                     )
