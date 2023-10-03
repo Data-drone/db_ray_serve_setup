@@ -1,8 +1,8 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC
-# MAGIC # Ray Setup
-# MAGIC setup testing
+# MAGIC # Setup Serve Deployment
+# MAGIC Basic ML example
 
 # COMMAND ----------
 
@@ -24,19 +24,14 @@ db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().api
 @serve.deployment(
   ray_actor_options={"num_cpus": 4},
   num_replicas=3,
-  user_config=json.dumps{
-      {
-          "DATABRICKS_HOST": db_host,
-          "DATABRICKS_TOKEN": db_token,
-      }}
 )
 class BoostingModel:
     def __init__(self, model_path: str, db_host: str, db_token: str):
 
         # We need to set these vars so that new python thread can find the 
-        #os.environ['DATABRICKS_HOST'] = db_host
-        #os.environ['DATABRICKS_TOKEN'] = db_token
-        # path = "runs:/327e476d760e4723a7f0b8efeb676931/model"
+        os.environ['DATABRICKS_HOST'] = db_host
+        os.environ['DATABRICKS_TOKEN'] = db_token
+        path = "runs:/327e476d760e4723a7f0b8efeb676931/model"
         self.model = mlflow.sklearn.load_model(model_path)
 
         self.label_list = ['setosa', 'versicolor', 'virginica']
@@ -57,6 +52,11 @@ class BoostingModel:
       
 # COMMAND ----------
 
+boosting_model = BoostingModel.bind("runs:/327e476d760e4723a7f0b8efeb676931/model")
 
-boosting_model = BoostingModel.bind("runs:/327e476d760e4723a7f0b8efeb676931/model", 
-                                    )
+# COMMAND ----------
+
+import ray
+ray.init('auto',ignore_reinit_error=True)
+
+serve.run(boosting_model)
