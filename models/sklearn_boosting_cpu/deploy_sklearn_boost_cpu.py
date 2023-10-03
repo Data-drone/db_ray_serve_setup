@@ -59,4 +59,12 @@ boosting_model = BoostingModel.bind("runs:/327e476d760e4723a7f0b8efeb676931/mode
 import ray
 ray.init('auto',ignore_reinit_error=True)
 
-serve.run(boosting_model)
+serve.run(boosting_model, name='boosting_model')
+
+# COMMAND ----------
+
+# getting list of running apps
+#serve.status()
+
+# deleting a deployment (since we didn't set any names it is called default)
+#serve.delete('boosting_model')
