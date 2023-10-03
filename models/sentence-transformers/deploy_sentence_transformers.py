@@ -25,7 +25,6 @@ db_token = dbutils.notebook.entry_point.getDbutils().notebook().getContext().api
   ray_actor_options={"num_gpus": 1},
   num_replicas=2,
 )
-
 class SentenceTransformer:
     def __init__(self, model_path: str, db_host: str, db_token: str):
 
@@ -33,7 +32,7 @@ class SentenceTransformer:
         os.environ['DATABRICKS_HOST'] = db_host
         os.environ['DATABRICKS_TOKEN'] = db_token
         #path = "runs:/b38a0b53f8884608a4fde549a0b4e48d/embedding_model"
-        self.model = mlflow.sklearn.load_model(model_path)
+        self.model = mlflow.sentence_transformers.load_model(model_path)
 
     async def __call__(self, starlette_request: Request) -> Dict:
 
@@ -53,7 +52,9 @@ class SentenceTransformer:
 # COMMAND ----------
 
 # hardcoding for now
-instruct_xl_model = SentenceTransformer.bind("runs:/b38a0b53f8884608a4fde549a0b4e48d/embedding_model")
+instruct_xl_model = SentenceTransformer.bind("runs:/b38a0b53f8884608a4fde549a0b4e48d/embedding_model",
+                                             db_host,
+                                             db_token)
 
 # COMMAND ----------
 
