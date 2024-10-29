@@ -19,5 +19,7 @@ The `3_xxxx.py` scripts provide an example of how to query the RESTAPis that we 
 
 These have to run on single-user clusters. That means that for general access, the devices that hit the service need to have tokens created for them by the user assigned to the cluster.
 
+This has been tested for MLR 15.4 and currently doesn't work for MLR 16 Beta
+
 All traffic is routed via the driver-proxy which is not intended for heavy duty scaling so mileage may vary
 
