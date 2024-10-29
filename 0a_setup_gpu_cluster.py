@@ -10,11 +10,8 @@
 # COMMAND ----------
 
 # DBTITLE 1,Update for sdk to allow single node GPU instances
-%pip install -U databricks-sdk >= 0.9.0
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
+# MAGIC %pip install -U databricks-sdk >= 0.9.0
+# MAGIC %restart_python
 
 # COMMAND ----------
 
@@ -63,8 +60,8 @@ if len(matching_clusters) == 0:
 
     c = w.clusters.create_and_wait(
     cluster_name             = 'ray_serve_embedding_cluster',
-    spark_version            = '14.0.x-gpu-ml-scala2.12',
-    node_type_id             = 'g5.2xlarge',
+    spark_version            = '15.4.x-gpu-ml-scala2.12',
+    node_type_id             = 'g5.4xlarge',
     autotermination_minutes  = 45,
     num_workers              = 2,
     init_scripts             = [update_sentence_transformer],

@@ -10,11 +10,8 @@
 # COMMAND ----------
 
 # DBTITLE 1,Update for sdk to allow single node GPU instances
-%pip install -U databricks-sdk >= 0.9.0
-
-# COMMAND ----------
-
-dbutils.library.restartPython()
+# MAGIC %pip install -U databricks-sdk >= 0.9.0
+# MAGIC %restart_python
 
 # COMMAND ----------
 
