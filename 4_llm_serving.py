@@ -88,12 +88,60 @@ setup_ray_cluster(
 
 # COMMAND ----------
 
+# DBTITLE 1,Useful Flags
+# --tensor-parallel-size 8 \ # for distributing to multiple GPUs on single node
+# --pipeline_parallel_size 2 \ # for distributing across nodes
+
+# COMMAND ----------
+
+# DBTITLE 1,Start Ray Serve
 # MAGIC %sh
-# MAGIC vllm serve /Volumes/brian_ml_dev/hf_models/model_weights/llama_3_1_70b-instruct \
-# MAGIC    --tensor-parallel-size 8 \
-# MAGIC    --pipeline_parallel_size 2 \
+# MAGIC vllm serve /Volumes/brian_ml_dev/hf_models/model_weights/llama_3_2_11_vision_instruct \
+# MAGIC    --served-model-name meta-llama/Llama-3.2-11B-Vision-Instruct \
 # MAGIC    --max-num-seq 16 \
 # MAGIC    --enforce-eager \
 # MAGIC    --distributed-executor-backend ray \
 # MAGIC    --port 10101
 
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC # Pinging the Server
+# MAGIC
+# MAGIC **Notes** the uri for the cluster is:
+# MAGIC https://<workspace-uri>/driver-proxy-api/o/0/<cluster_id>/<port-we-set>/<rest of openai api spec>
+# MAGIC
+
+# COMMAND ----------
+
+# DBTITLE 1,Ping Server via CLI
+# MAGIC %sh
+# MAGIC curl \
+# MAGIC  -H "Authorization: Bearer <insert_token>" \
+# MAGIC  -H "Content-Type": "application/json" \
+# MAGIC  https://adb-984752964297111.11.azuredatabricks.net/driver-proxy-api/o/0/1015-220646-53zdi0og/7682/v1/models
+
+# COMMAND ----------
+
+# DBTITLE 1,Ping Server via OpenAI API
+from openai import OpenAI
+
+client = OpenAI(
+  base_url="https://adb-984752964297111.11.azuredatabricks.net/driver-proxy-api/o/0/1015-220646-53zdi0og/7682/v1/",
+  api_key="<db_auth_token>"
+)
+
+client.chat.completions.create(
+  model="meta-llama/Llama-3.2-11B-Vision-Instruct",
+  messages=[
+    {
+      "role": "user",
+      "content": [
+        {"type": "text", "text": "tell me a joke"}
+      ],
+    }
+  ],
+  max_tokens=1064,
+)
+
+# COMMAND ----------
