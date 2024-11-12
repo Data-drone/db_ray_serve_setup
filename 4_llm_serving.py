@@ -27,6 +27,34 @@ dbfs_log_path = f'/dbfs/{log_path}'
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC # Single Node Cluster
+# MAGIC
+# MAGIC The `setup_ray_cluster` integration is for multimodal setups. For single node we can use standard Ray APIs
+
+# COMMAND ----------
+
+import ray
+
+try:
+  ray.shutdown()
+except RuntimeError:
+  pass
+
+ray.init(address="local", 
+         num_cpus=20, 
+         num_gpus=1,
+         dashboard_host="0.0.0.0")
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC # Multi Node Cluster
+# MAGIC
+# MAGIC The `setup_ray_cluster` integration is for multimodal setups. For single node we can use standard Ray APIs
+
+# COMMAND ----------
+
 # DBTITLE 1,Clear Ray Environment
 from ray.util.spark import setup_ray_cluster, shutdown_ray_cluster
 
@@ -54,7 +82,7 @@ except RuntimeError:
 
 # DBTITLE 1,Start cluster
 
-# config for 1x A100 Azure node - adjust as needed
+# Make sure CPU / GPU etc is configured correctly
 setup_ray_cluster(
     max_worker_nodes = 2,
     num_gpus_head_node = 1,
@@ -62,11 +90,6 @@ setup_ray_cluster(
     num_gpus_worker_node = 1,
     collectl_log_to_path = dbfs_log_path
 )
-
-# COMMAND ----------
-
-# MAGIC %sh
-# MAGIC #vllm serve /Volumes/brian_ml_dev/hf_models/model_weights/llama_3_1_70b-instruct
 
 # COMMAND ----------
 
@@ -88,7 +111,7 @@ setup_ray_cluster(
 
 # COMMAND ----------
 
-# DBTITLE 1,Useful Flags
+# DBTITLE 1,Other Useful Flags
 # --tensor-parallel-size 8 \ # for distributing to multiple GPUs on single node
 # --pipeline_parallel_size 2 \ # for distributing across nodes
 
@@ -145,3 +168,21 @@ client.chat.completions.create(
 )
 
 # COMMAND ----------
+
+# MAGIC %sh
+# MAGIC # Using with AI Gateway
+# MAGIC
+# MAGIC A vllm server is compliant with OpenAI API Spec and can be used with that \
+# MAGIC Integrating with Databricks AI Gateway will give you a stable URI and also the monitoring and governance structures necessary for production use. \
+# MAGIC
+# MAGIC For Gateway configure as follows:
+# MAGIC - *Provider*: OpenAI / Azure OpenAI
+# MAGIC - *OpenAI API type*: OpenAI
+# MAGIC - *Secret*: Databricks token of the user who created the vllm server
+# MAGIC - *Task*: Depends on model, usually chat
+# MAGIC - *Provider model*: the name set in vllm ie the `--served-model-name`` param
+# MAGIC
+# MAGIC Open the Advanced Configuration Tab
+# MAGIC - *OpenAI API Base*: the same uri used in base_uri above ie: https://adb-984752964297111.11.azuredatabricks.net/driver-proxy-api/o/0/1015-220646-53zdi0og/7682/v1
+# MAGIC - *OpenAI Organiszation*: leave blank
+# MAGIC - *Served Entity Name*: the name set in vllm ie the `--served-model-name`` param
